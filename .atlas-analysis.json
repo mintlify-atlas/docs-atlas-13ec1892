@@ -1,0 +1,72 @@
+{
+  "projectType": "general",
+  "projectName": "Zilong Liang",
+  "projectDescription": "A monorepo for Zilong Liang's personal websites — a landing page, a technical blog, and a daily-life journal — built with Astro and managed by a custom journal CLI.",
+  "theme": "willow",
+  "primaryColor": "#a59b93",
+  "lightColor": "#2a273e",
+  "darkColor": null,
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Introduction",
+            "pages": ["introduction", "project-structure"]
+          },
+          {
+            "group": "Websites",
+            "pages": ["websites/www", "websites/tech", "websites/days"]
+          }
+        ]
+      },
+      {
+        "tab": "Journal CLI",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": ["journal/overview", "journal/installation"]
+          },
+          {
+            "group": "Commands",
+            "pages": ["journal/commands/new", "journal/commands/ship"]
+          },
+          {
+            "group": "Content Model",
+            "pages": ["journal/content-model", "journal/note-types"]
+          }
+        ]
+      },
+      {
+        "tab": "Shared Packages",
+        "groups": [
+          {
+            "group": "Packages",
+            "pages": ["packages/theme", "packages/rehype"]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Three Astro-based personal websites: landing page (www), technical blog (tech), and daily-life journal (days)",
+    "Custom `journal` CLI for creating notes and post drafts and publishing them",
+    "Shared `@zlliang/theme` package providing Astro components, styles, and utilities across websites",
+    "Shared `@zlliang/rehype` package for custom rehype plugins",
+    "pnpm workspace monorepo structure with coordinated build and dev scripts",
+    "Content model with typed notes (regular, link, collection, quote, til, post) and published posts",
+    "Bilingual support: landing page has both English and Chinese versions",
+    "Deployed on Vercel with analytics and speed insights"
+  ],
+  "publicApiSurface": [
+    "journal new note [title...] --type <type>",
+    "journal new post [title...]",
+    "journal ship [draft]",
+    "@zlliang/journal/note-types (NoteType, noteTypeSlugs, isNoteType)",
+    "@zlliang/theme (shared Astro components: Header, Footer, Link, PageTitle, Pagination, Section)",
+    "content/notes/**/*.md (note schema: no, title, created, type, post, draft)",
+    "content/posts/**/*.md (post schema: title, created, series, pinned, draft)",
+    "content/posts/series.json (series schema: title, description)"
+  ]
+}

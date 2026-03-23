@@ -1,0 +1,96 @@
+---
+title: "journal ship"
+description: "Publish a post draft and create the associated note."
+---
+
+## Syntax
+
+```sh
+journal ship [draft]
+```
+
+## Arguments
+
+<ParamField path="draft" type="string">
+  Slug (or filename) of the draft to ship. If omitted and there is exactly one draft, it is selected automatically. If omitted and there are multiple drafts, the command prompts you to choose interactively.
+
+  Both `how-i-use-ai-agents` and `how-i-use-ai-agents.md` are accepted.
+</ParamField>
+
+## Publish workflow
+
+<Steps>
+  <Step title="List drafts">
+    Reads all `*.md` files from `content/posts/drafts/` and sorts them alphabetically.
+
+    If no drafts exist the command exits with an error.
+  </Step>
+  <Step title="Select draft">
+    - If `[draft]` is provided, the matching filename is used. An error is raised if it is not found.
+    - If only one draft exists, it is selected automatically.
+    - Otherwise an interactive numbered prompt is shown so you can pick by number.
+
+    <Note>
+      Interactive selection requires a TTY. In non-interactive environments (CI, pipes) you must pass the draft slug explicitly.
+    </Note>
+  </Step>
+  <Step title="Publish the post">
+    The draft is written to `content/posts/YYYY/MM/DD/<slug>.md` using today's date.
+
+    The frontmatter is updated:
+    - `draft: true` is **removed**.
+    - `created` is set to today's date (`YYYY-MM-DD`).
+
+    All other frontmatter fields from the draft are preserved.
+  </Step>
+  <Step title="Create the associated note">
+    A new note of type `post` is created at `content/notes/YYYY/MM/DD/<slug>.md`.
+
+    The note frontmatter includes a `post` field referencing the published post path:
+
+    ```yaml
+    ---
+    no: 43
+    title: How I use AI agents
+    created: 2026-03-23
+    type: post
+    post: 2026/03/23/how-i-use-ai-agents
+    ---
+    ```
+
+    The note number is assigned by scanning existing notes, the same way [`journal new note`](/journal/commands/new) works.
+  </Step>
+  <Step title="Move draft images">
+    If `content/posts/drafts/images/` exists and is non-empty, all files inside it are moved to `content/posts/YYYY/MM/DD/images/`.
+
+    The source `drafts/images/` directory is then removed. If there are no draft images this step is skipped silently.
+  </Step>
+  <Step title="Delete the draft">
+    The original draft file at `content/posts/drafts/<slug>.md` is deleted.
+  </Step>
+</Steps>
+
+## Output
+
+On success the command prints one line per action:
+
+```
+Shipped post: content/posts/2026/03/23/how-i-use-ai-agents.md
+Created note #43: content/notes/2026/03/23/how-i-use-ai-agents.md
+Moved images to: content/posts/2026/03/23/images   # only if images exist
+Deleted draft: content/posts/drafts/how-i-use-ai-agents.md
+```
+
+## Examples
+
+```sh
+# Automatic selection when there is only one draft, or interactive prompt
+journal ship
+
+# Ship a specific draft by slug
+journal ship how-i-use-ai-agents
+```
+
+## Context resolution
+
+The command walks up from the current working directory until it finds a directory that contains both `content/notes` and `content/posts`. Run it from anywhere inside a site that follows that structure.

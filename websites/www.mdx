@@ -1,0 +1,101 @@
+---
+title: "www"
+description: "The bilingual landing site served at zlliang.me."
+---
+
+The `www` website is the personal landing page at [zlliang.me](https://zlliang.me). It is built with [Astro](https://astro.build/) and deployed on [Vercel](https://vercel.com/).
+
+## Key facts
+
+<CardGroup cols={2}>
+  <Card title="Package" icon="box">
+    `@zlliang/www`
+  </Card>
+  <Card title="Live URL" icon="globe">
+    [zlliang.me](https://zlliang.me)
+  </Card>
+  <Card title="Dev port" icon="plug">
+    `3001`
+  </Card>
+  <Card title="Adapter" icon="cloud">
+    Vercel (SSR)
+  </Card>
+</CardGroup>
+
+## Bilingual structure
+
+The site supports English and Simplified Chinese. Astro's built-in i18n routing maps each locale to a URL prefix.
+
+| Locale | Path prefix | Example |
+| ------ | ----------- | ------- |
+| English (default) | `/en/` | `/en/` |
+| Chinese | `/zh/` | `/zh/` |
+
+The root `/` redirects the visitor to their preferred locale. Both locales share the same page components; language-specific copy is pulled from the `fragments` content collection.
+
+## Content model
+
+The site uses a single Astro content collection:
+
+```
+content/
+└── fragments/
+    └── *.md      # Localized text fragments
+```
+
+Fragments hold short pieces of copy (headings, labels, bio text) that differ between locales. They are loaded with Astro's `glob` loader and consumed by page components at build time.
+
+<Note>
+  The `fragments` collection has no enforced schema beyond the Markdown body. Frontmatter keys are defined informally and read by page components directly.
+</Note>
+
+## Dependencies
+
+<AccordionGroup>
+  <Accordion title="Runtime">
+    | Package | Purpose |
+    | ------- | ------- |
+    | `@zlliang/theme` | Shared styles, utilities, and Astro components |
+    | `@vercel/analytics` | Vercel Web Analytics |
+    | `@vercel/speed-insights` | Vercel Speed Insights |
+  </Accordion>
+  <Accordion title="Build tooling">
+    | Package | Purpose |
+    | ------- | ------- |
+    | `tailwindcss` + `@tailwindcss/vite` | Utility-first CSS via Vite plugin |
+    | `@iconify/tailwind4` | Iconify icon utilities for Tailwind v4 |
+    | `@iconify-json/lucide` | Lucide icon set |
+    | `@iconify-json/simple-icons` | Simple Icons brand icon set |
+    | `@zlliang/rehype` | Shared rehype plugins (heading IDs, autolinks, external links, footnotes, image captions, code copy) |
+    | `@astrojs/sitemap` | Sitemap generation with i18n support |
+    | `@astrojs/vercel` | Vercel adapter |
+    | `remark-cjk-friendly` | CJK-aware Markdown line-break handling |
+  </Accordion>
+</AccordionGroup>
+
+## Local development
+
+<Steps>
+  <Step title="Install dependencies">
+    From the repository root:
+
+    ```bash
+    pnpm install
+    ```
+  </Step>
+  <Step title="Start the dev server">
+    ```bash
+    pnpm dev:www
+    ```
+
+    The site is available at `http://localhost:3001`.
+  </Step>
+</Steps>
+
+## Building for production
+
+```bash
+pnpm build:www
+```
+
+Astro outputs static assets and server functions to `websites/www/dist/`. Vercel picks this up automatically on deploy.

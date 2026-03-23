@@ -1,0 +1,128 @@
+---
+title: "journal new"
+description: "Create a new note or post draft."
+---
+
+## Syntax
+
+```sh
+journal new <entry> [title...]
+```
+
+`<entry>` must be either `note` or `post`. Any words that follow are joined into the title.
+
+<Tabs>
+  <Tab title="note">
+    Creates a new note file under `content/notes/YYYY/MM/DD/<slug>.md` inside the nearest site root.
+
+    ```sh
+    journal new note [title...] [--type <type>]
+    ```
+
+    ### Options
+
+    <ParamField path="--type" type="string" default="regular">
+      The note type. Must be one of the values listed below.
+
+      | Value | Description |
+      |---|---|
+      | `regular` | A standard short note |
+      | `link` | A link with commentary |
+      | `collection` | A curated list |
+      | `quote` | A quoted passage |
+      | `til` | Today I Learned |
+      | `post` | Auto-assigned when shipping a post draft — prefer `journal ship` instead |
+    </ParamField>
+
+    ### Behavior
+
+    - The sequential note number (`no`) is determined by scanning all existing `*.md` files under `content/notes/` and incrementing the highest `no` found.
+    - If no title is given the slug and title default to `untitled`.
+    - The title is stored as-is in `title`; the filename slug is lowercased and non-alphanumeric characters are replaced with hyphens.
+    - If a file already exists at the resolved path the command exits with an error.
+
+    ### Generated frontmatter
+
+    ```yaml
+    ---
+    no: 42
+    title: A useful article   # omitted when no title is given
+    created: 2026-03-23
+    type: link
+    ---
+    ```
+
+    The file body is initialized with the placeholder text `TODO`.
+
+    ### Examples
+
+    ```sh
+    # Regular note with no title
+    journal new note
+
+    # Link note with a title
+    journal new note --type link "A useful article"
+
+    # TIL note
+    journal new note --type til "CSS anchor positioning"
+    ```
+  </Tab>
+  <Tab title="post">
+    Creates a new post draft at `content/posts/drafts/<slug>.md` inside the nearest site root.
+
+    ```sh
+    journal new post <title...>
+    ```
+
+    ### Arguments
+
+    <ParamField path="title" type="string" required>
+      The post title. All words after `post` are joined with spaces. A title is required — without it the slug and title fall back to `untitled`.
+    </ParamField>
+
+    ### Behavior
+
+    - The `--type` option is **not** valid for posts. Passing it raises an error.
+    - `draft: true` is written to the frontmatter so site builds can filter it out.
+    - If a file already exists at the resolved path the command exits with an error.
+
+    ### Generated frontmatter
+
+    ```yaml
+    ---
+    title: How I use AI agents
+    created: 2026-03-23
+    draft: true
+    ---
+    ```
+
+    The file body is initialized with the placeholder text `TODO`.
+
+    ### Examples
+
+    ```sh
+    # Create a post draft
+    journal new post "How I use AI agents"
+    ```
+
+    <Tip>
+      When you are ready to publish, use [`journal ship`](/journal/commands/ship) to move the draft to its final location and create the associated note.
+    </Tip>
+  </Tab>
+</Tabs>
+
+## Output
+
+On success the command prints a single line:
+
+```
+# note
+Created note #42: content/notes/2026/03/23/a-useful-article.md
+
+# post draft
+Created post draft: content/posts/drafts/how-i-use-ai-agents.md
+```
+
+## Context resolution
+
+The command walks up from the current working directory until it finds a directory that contains both `content/notes` and `content/posts`. Run it from anywhere inside a site that follows that structure.

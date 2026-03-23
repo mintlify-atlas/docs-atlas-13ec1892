@@ -1,0 +1,90 @@
+---
+title: "Installation"
+description: "How to set up and invoke the journal CLI within the monorepo."
+---
+
+# Installation
+
+`@zlliang/journal` is a private workspace package — it is not published to npm and does not need to be installed separately. Running `pnpm install` in the repository root installs it alongside all other packages.
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) (see `.nvmrc` or `engines` field for the required version)
+- [pnpm](https://pnpm.io/) v9 or later
+- The repository cloned locally
+
+## Setup
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/zlliang/zlliang.git
+    cd zlliang
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    Run `pnpm install` from the repository root. This installs all workspace packages, including `@zlliang/journal`.
+
+    ```bash
+    pnpm install
+    ```
+  </Step>
+  <Step title="Verify the installation">
+    Confirm the CLI is available by printing the help output:
+
+    ```bash
+    pnpm journal:tech --help
+    ```
+
+    You should see output like:
+
+    ```text
+    Usage:
+      $ journal <command> [options]
+
+    Commands:
+      new <entry> [title...]  Create a new note or post draft
+      ship [draft]            Publish a post draft and create the associated note
+
+    For more info, run any command with the `--help` flag:
+      $ journal new --help
+      $ journal ship --help
+
+    Options:
+      -h, --help     Display this message
+      -v, --version  Display version number
+    ```
+  </Step>
+</Steps>
+
+## Invoking the CLI
+
+There are two ways to run `journal` depending on where you are in the repository.
+
+### From the repository root
+
+The root `package.json` defines two scripts that target each content site:
+
+```bash
+# Run against the tech website (websites/tech)
+pnpm journal:tech
+
+# Run against the days website (websites/days)
+pnpm journal:days
+```
+
+Both scripts use `pnpm --dir` to change into the relevant website directory before invoking the `journal` binary, so context resolution works correctly.
+
+### From within a website directory
+
+If you are already working inside `websites/tech` or `websites/days`, you can invoke the CLI directly:
+
+```bash
+pnpm journal
+```
+
+This works because each content website lists `@zlliang/journal` as a devDependency via the workspace protocol, making the `journal` binary available in that package's local `node_modules/.bin`.
+
+<Note>
+  Always run the CLI from within a directory that has `content/notes` and `content/posts` subdirectories, or from a directory that is a descendant of one. The CLI walks up the directory tree to find this structure automatically.
+</Note>

@@ -1,0 +1,133 @@
+---
+title: "tech"
+description: "The English technical blog served at tech.zlliang.me."
+---
+
+The `tech` website is a technical blog at [tech.zlliang.me](https://tech.zlliang.me). It publishes short notes and long-form posts on software engineering topics. It is built with [Astro](https://astro.build/) and deployed on [Vercel](https://vercel.com/).
+
+## Key facts
+
+<CardGroup cols={2}>
+  <Card title="Package" icon="box">
+    `@zlliang/tech`
+  </Card>
+  <Card title="Live URL" icon="globe">
+    [tech.zlliang.me](https://tech.zlliang.me)
+  </Card>
+  <Card title="Dev port" icon="plug">
+    `3002`
+  </Card>
+  <Card title="Adapter" icon="cloud">
+    Vercel (SSR)
+  </Card>
+</CardGroup>
+
+## Content model
+
+The site uses three Astro content collections defined in `src/content.config.ts`.
+
+### Notes
+
+Notes are short, low-friction entries similar to a microblog.
+
+```
+content/notes/
+└── YYYY/MM/DD/
+    └── slug.md
+```
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `no` | `integer` | Yes | Sequential note number |
+| `title` | `string` | No | Optional display title |
+| `created` | `date` | Yes | Creation timestamp |
+| `type` | `enum` | No | Note type slug; defaults to `"regular"` |
+| `post` | `reference(posts)` | No | Related post reference |
+| `draft` | `boolean` | No | Hides the note from listings; defaults to `false` |
+
+### Posts
+
+Posts are longer articles. Published posts are filed under a date path; drafts live in a separate subdirectory.
+
+```
+content/posts/
+├── YYYY/MM/DD/
+│   └── slug.md       # Published posts
+├── drafts/
+│   └── slug.md       # Draft posts
+└── series.json       # Series definitions
+```
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `title` | `string` | Yes | Post title |
+| `created` | `date` | Yes | Creation timestamp |
+| `series` | `reference(series)` | No | Series this post belongs to |
+| `pinned` | `boolean` | No | Pin to top of listing; defaults to `false` |
+| `draft` | `boolean` | No | Hides the post from listings; defaults to `false` |
+
+### Series
+
+The `series` collection groups related posts together. It is loaded from a single JSON file.
+
+```
+content/posts/series.json
+```
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `title` | `string` | Yes | Series display title |
+| `description` | `string` | No | Short description of the series |
+
+## Page routes
+
+| Route | Description |
+| ----- | ----------- |
+| `/` | Latest notes (paginated) |
+| `/notes/` | Note archive with pagination |
+| `/notes/[year]/` | Notes filtered by year |
+| `/notes/types/` | Notes filtered by type |
+| `/notes/search` | Full-text note search |
+| `/notes/[...slug]` | Individual note |
+| `/posts/` | Post listing |
+| `/posts/series/` | Series listing |
+| `/posts/[...slug]` | Individual post |
+
+## Creating content
+
+Use the `journal` CLI to scaffold new notes and posts. The CLI is available as a workspace package (`@zlliang/journal`) and is wired up as a local script.
+
+```bash
+# Run from the repository root
+pnpm --filter @zlliang/tech journal <command>
+
+# Or from within websites/tech/
+pnpm journal <command>
+```
+
+<Tip>
+  See the [journal CLI reference](/journal/overview) for the full list of commands and options.
+</Tip>
+
+## Local development
+
+<Steps>
+  <Step title="Install dependencies">
+    ```bash
+    pnpm install
+    ```
+  </Step>
+  <Step title="Start the dev server">
+    ```bash
+    pnpm dev:tech
+    ```
+
+    The site is available at `http://localhost:3002`.
+  </Step>
+</Steps>
+
+## Building for production
+
+```bash
+pnpm build:tech
+```

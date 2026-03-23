@@ -1,0 +1,164 @@
+---
+title: "Content Model"
+description: "The schema and directory layout shared by the tech and days websites."
+---
+
+Both `tech` and `days` share an identical content model. Three Astro content collections are defined in each site's `src/content.config.ts`: **notes**, **posts**, and **series**.
+
+## Collections
+
+### notes
+
+Loaded with `glob` from `content/notes/`. Each file is a short-form note.
+
+<ResponseField name="no" type="integer" required>
+  Sequential note number. Assigned automatically by `journal new note` by scanning existing notes and incrementing the highest `no` found.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Optional note title. When omitted, the note appears untitled in the UI.
+</ResponseField>
+
+<ResponseField name="created" type="date" required>
+  Creation date. The value is coerced by Zod, so ISO strings like `2026-03-23` are accepted.
+</ResponseField>
+
+<ResponseField name="type" type="enum" required>
+  Note type. Defaults to `regular`. Must be one of: `regular`, `link`, `collection`, `quote`, `til`, `post`. See [Note Types](/journal/note-types) for descriptions of each value.
+</ResponseField>
+
+<ResponseField name="post" type="reference">
+  Reference to an entry in the **posts** collection. Set automatically by `journal ship` when a draft is published. The value is a path string of the form `YYYY/MM/DD/slug`.
+</ResponseField>
+
+<ResponseField name="draft" type="boolean">
+  Defaults to `false`. Notes are not normally drafted — this field exists for consistency with the posts schema.
+</ResponseField>
+
+### posts
+
+Loaded with `glob` from `content/posts/`. Each file is a long-form post.
+
+<ResponseField name="title" type="string" required>
+  Post title. Must be at least one character.
+</ResponseField>
+
+<ResponseField name="created" type="date" required>
+  Publication date. Coerced from ISO strings. Set to today when `journal ship` moves a draft to its published path.
+</ResponseField>
+
+<ResponseField name="series" type="reference">
+  Optional reference to an entry in the **series** collection. Used to group related posts together.
+</ResponseField>
+
+<ResponseField name="pinned" type="boolean">
+  Defaults to `false`. Pinned posts are surfaced at the top of post listings.
+</ResponseField>
+
+<ResponseField name="draft" type="boolean">
+  Defaults to `false`. The `draft: true` field is present in files under `content/posts/drafts/` and is stripped by `journal ship` when a post is published.
+</ResponseField>
+
+### series
+
+Loaded with `file` from `content/posts/series.json`. Each entry represents a named group of related posts.
+
+<ResponseField name="title" type="string" required>
+  Series title displayed in the UI.
+</ResponseField>
+
+<ResponseField name="description" type="string">
+  Optional short description of the series.
+</ResponseField>
+
+<Tip>
+  The `series.json` file is a JSON array where each object must also have an `id` field — this is the identifier used when referencing a series from a post's `series` frontmatter field.
+</Tip>
+
+## Directory layout
+
+```text
+content/
+  notes/
+    YYYY/
+      MM/
+        DD/
+          <slug>.md
+  posts/
+    drafts/
+      <slug>.md           ← unpublished draft
+      images/             ← draft images
+    YYYY/
+      MM/
+        DD/
+          <slug>.md       ← published post
+          images/         ← post images
+    series.json
+```
+
+`journal new note` creates the date-nested path under `content/notes/` automatically. `journal ship` moves a draft from `content/posts/drafts/` to the appropriate `content/posts/YYYY/MM/DD/` path and also migrates any images from `drafts/images/` to the published post's `images/` directory.
+
+## Frontmatter examples
+
+### Note
+
+A `link`-type note filed on 19 January 2026:
+
+```markdown content/notes/2026/01/19/simon-willison-on-technical-blogging.md
+---
+no: 26
+title: Simon Willison on Technical Blogging
+created: 2026-01-19
+type: link
+---
+
+[Simon Willison on Technical Blogging](https://writethatblog.substack.com/p/simon-willison-on-technical-blogging).
+Simon was the direct catalyst for me starting my own blog, so it's great to see
+him share more about his blogging experience.
+```
+
+A `post`-type note created automatically by `journal ship`:
+
+```markdown content/notes/2026/01/13/splitting-my-websites-and-finalizing-my-writing-framework.md
+---
+no: 22
+title: Splitting My Websites and Finalizing My Writing Framework
+created: 2026-01-13
+post: 2026/01/13/splitting-my-websites-and-finalizing-my-writing-framework
+type: post
+---
+
+Last weekend, I reorganized my personal websites...
+```
+
+<Note>
+  The `post` reference value is the path-style ID that Astro uses to look up the entry in the posts collection (`YYYY/MM/DD/slug`, without a file extension).
+</Note>
+
+### Post
+
+A published post that belongs to the *How I Write* series:
+
+```markdown content/posts/2026/01/13/splitting-my-websites-and-finalizing-my-writing-framework.md
+---
+title: Splitting My Websites and Finalizing My Writing Framework
+created: 2026-01-13
+series: how-i-write
+---
+
+After starting my blog from scratch at the end of 2025...
+```
+
+A post draft before it is shipped (note `draft: true` and location under `drafts/`):
+
+```markdown content/posts/drafts/how-i-use-ai-agents.md
+---
+title: How I Use AI Agents
+created: 2026-03-23
+draft: true
+---
+
+TODO
+```
+
+`journal ship` removes the `draft` field and updates `created` to today's date when moving this file to its published location.

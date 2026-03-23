@@ -1,0 +1,126 @@
+---
+title: "days"
+description: "The Chinese daily-life journal served at days.zlliang.me."
+---
+
+The `days` website is a personal daily-life journal at [days.zlliang.me](https://days.zlliang.me). Content is written in Chinese. It shares the same note/post content model as [`tech`](/websites/tech). It is built with [Astro](https://astro.build/) and deployed on [Vercel](https://vercel.com/).
+
+## Key facts
+
+<CardGroup cols={2}>
+  <Card title="Package" icon="box">
+    `@zlliang/days`
+  </Card>
+  <Card title="Live URL" icon="globe">
+    [days.zlliang.me](https://days.zlliang.me)
+  </Card>
+  <Card title="Dev port" icon="plug">
+    `3003`
+  </Card>
+  <Card title="Adapter" icon="cloud">
+    Vercel (SSR)
+  </Card>
+</CardGroup>
+
+## Content model
+
+The `days` site uses the same three-collection model as `tech`: `notes`, `posts`, and `series`. Schemas are identical.
+
+### Notes
+
+```
+content/notes/
+└── YYYY/MM/DD/
+    └── slug.md
+```
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `no` | `integer` | Yes | Sequential note number |
+| `title` | `string` | No | Optional display title |
+| `created` | `date` | Yes | Creation timestamp |
+| `type` | `enum` | No | Note type slug; defaults to `"regular"` |
+| `post` | `reference(posts)` | No | Related post reference |
+| `draft` | `boolean` | No | Hides the note from listings; defaults to `false` |
+
+### Posts
+
+```
+content/posts/
+├── YYYY/MM/DD/
+│   └── slug.md       # Published posts
+├── drafts/
+│   └── slug.md       # Draft posts
+└── series.json       # Series definitions
+```
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `title` | `string` | Yes | Post title |
+| `created` | `date` | Yes | Creation timestamp |
+| `series` | `reference(series)` | No | Series this post belongs to |
+| `pinned` | `boolean` | No | Pin to top of listing; defaults to `false` |
+| `draft` | `boolean` | No | Hides the post from listings; defaults to `false` |
+
+### Series
+
+```
+content/posts/series.json
+```
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+| `title` | `string` | Yes | Series display title |
+| `description` | `string` | No | Short description of the series |
+
+<Note>
+  For the full schema reference and content model explanation, see the [`tech` overview](/websites/tech). The two sites share the same structure.
+</Note>
+
+## Page routes
+
+| Route | Description |
+| ----- | ----------- |
+| `/` | Latest notes (paginated) |
+| `/notes/` | Note archive |
+| `/posts/` | Post listing |
+| `/posts/series/` | Series listing |
+
+## Creating content
+
+Use the `journal` CLI to scaffold new notes and posts.
+
+```bash
+# Run from the repository root
+pnpm --filter @zlliang/days journal <command>
+
+# Or from within websites/days/
+pnpm journal <command>
+```
+
+<Tip>
+  See the [journal CLI reference](/journal/overview) for the full list of commands and options.
+</Tip>
+
+## Local development
+
+<Steps>
+  <Step title="Install dependencies">
+    ```bash
+    pnpm install
+    ```
+  </Step>
+  <Step title="Start the dev server">
+    ```bash
+    pnpm dev:days
+    ```
+
+    The site is available at `http://localhost:3003`.
+  </Step>
+</Steps>
+
+## Building for production
+
+```bash
+pnpm build:days
+```

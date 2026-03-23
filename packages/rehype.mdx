@@ -1,0 +1,183 @@
+---
+title: "@zlliang/rehype"
+description: "Shared rehype plugins for Markdown and MDX processing used across all websites."
+---
+
+`@zlliang/rehype` is a private workspace package that collects rehype plugins used during Markdown/MDX compilation. It re-exports three upstream plugins and adds two custom ones written specifically for this monorepo.
+
+## Installation
+
+The package is referenced as a workspace dependency in each site's `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@zlliang/rehype": "workspace:*"
+  }
+}
+```
+
+## Usage in `astro.config.ts`
+
+Plugins are passed to the `rehypePlugins` array inside Astro's `markdown` configuration:
+
+```typescript
+import {
+  rehypeHeadingIds,
+  rehypeAutolinkHeadings,
+  rehypeExternalLinks,
+  rehypeFootnotePrefixes,
+  rehypeImageCaptions,
+  rehypeCodeCopy,
+} from "@zlliang/rehype"
+import { defineConfig } from "astro/config"
+
+export default defineConfig({
+  markdown: {
+    rehypePlugins: [
+      rehypeHeadingIds,
+      rehypeAutolinkHeadings,
+      rehypeExternalLinks,
+      rehypeFootnotePrefixes,
+      rehypeImageCaptions,
+      rehypeCodeCopy,
+    ],
+  },
+})
+```
+
+## Plugins
+
+<CardGroup cols={2}>
+  <Card title="rehypeHeadingIds" icon="hash">
+    Re-exported from `@astrojs/markdown-remark`. Adds `id` attributes to all heading elements.
+  </Card>
+  <Card title="rehypeAutolinkHeadings" icon="link">
+    Re-exported from `rehype-autolink-headings`. Wraps heading text in anchor links using each heading's `id`.
+  </Card>
+  <Card title="rehypeExternalLinks" icon="external-link">
+    Re-exported from `rehype-external-links`. Adds `target` and `rel` attributes to links pointing to external domains.
+  </Card>
+  <Card title="rehypeFootnotePrefixes" icon="subscript">
+    Custom plugin. Prefixes footnote `id` attributes and `href` values with the source file's path slug to prevent ID collisions when multiple notes render on a single page.
+  </Card>
+  <Card title="rehypeImageCaptions" icon="image">
+    Custom plugin. Reads the `alt` attribute of each `<img>` element and appends a `<span class="caption">` sibling after it.
+  </Card>
+  <Card title="rehypeCodeCopy" icon="copy">
+    Custom plugin. Wraps each fenced code block in a `<div class="code-copy">` container and injects a copy button with client-side clipboard logic.
+  </Card>
+</CardGroup>
+
+---
+
+### rehypeHeadingIds
+
+Re-exported from [`@astrojs/markdown-remark`](https://github.com/withastro/astro/tree/main/packages/markdown/remark). Adds stable `id` attributes to `h1`–`h6` elements based on their text content. This is a prerequisite for `rehypeAutolinkHeadings`.
+
+```typescript
+import { rehypeHeadingIds } from "@zlliang/rehype"
+```
+
+---
+
+### rehypeAutolinkHeadings
+
+Re-exported from [`rehype-autolink-headings`](https://github.com/rehypejs/rehype-autolink-headings). Wraps each heading in an anchor tag that links back to the heading itself, enabling in-page navigation and copyable heading links.
+
+```typescript
+import { rehypeAutolinkHeadings } from "@zlliang/rehype"
+```
+
+<Note>
+  Must be used **after** `rehypeHeadingIds` in the plugin list so that heading `id` attributes already exist when the links are injected.
+</Note>
+
+---
+
+### rehypeExternalLinks
+
+Re-exported from [`rehype-external-links`](https://github.com/rehypejs/rehype-external-links). Detects links to external domains and adds `target="_blank"` and `rel="noopener noreferrer"` (or similar) attributes. Accepts the same options as the upstream package.
+
+```typescript
+import { rehypeExternalLinks } from "@zlliang/rehype"
+```
+
+---
+
+### rehypeFootnotePrefixes
+
+A custom plugin that prevents footnote ID collisions when multiple Markdown files are rendered on the same HTML page — for example, a list page that renders note excerpts inline.
+
+**How it works:** The plugin derives a slug from the source file's path (stripping the leading `content/` prefix and replacing `/` with `-`), then prepends that slug to every element `id` and `href` that starts with `user-content-fn`.
+
+**Before:**
+```html
+<sup><a href="#user-content-fn-1">1</a></sup>
+<!-- ... -->
+<li id="user-content-fn-1">Footnote text.</li>
+```
+
+**After** (for a file at `content/notes/2025/01/15/example.md`):
+```html
+<sup><a href="#notes-2025-01-15-example-user-content-fn-1">1</a></sup>
+<!-- ... -->
+<li id="notes-2025-01-15-example-user-content-fn-1">Footnote text.</li>
+```
+
+```typescript
+import { rehypeFootnotePrefixes } from "@zlliang/rehype"
+```
+
+---
+
+### rehypeImageCaptions
+
+A custom plugin that turns image `alt` text into a visible caption element. For every `<img>` with a non-empty `alt` attribute, it appends a `<span class="caption">` sibling containing the alt text.
+
+The `.caption` class is styled by `@zlliang/theme/main.css` to display as a centered, muted line below the image.
+
+**Input (Markdown):**
+```markdown
+![A scenic mountain view](./mountain.jpg)
+```
+
+**Output (HTML):**
+```html
+<img src="./mountain.jpg" alt="A scenic mountain view" />
+<span class="caption">A scenic mountain view</span>
+```
+
+```typescript
+import { rehypeImageCaptions } from "@zlliang/rehype"
+```
+
+---
+
+### rehypeCodeCopy
+
+A custom plugin that adds a clipboard copy button to every fenced code block. It wraps each `<pre><code>` block in a `<div class="code-copy">` container and injects a `<button class="code-copy-button">` with two icon spans: one for the copy state and one for the copied-confirmation state.
+
+A small inline `<script>` is prepended to the document (only once, guarded by `globalThis.__codeCopy`) to handle click events via event delegation. On click, it copies the code text to the clipboard and toggles the `copied` class on the button for 2 seconds.
+
+The `.code-copy`, `.code-copy-button`, `.code-copy-copy`, and `.code-copy-check` classes are all styled by `@zlliang/theme/main.css`.
+
+**Output structure (HTML):**
+```html
+<script>/* clipboard event handler */</script>
+<div class="code-copy">
+  <button type="button" class="code-copy-button" aria-label="Copy">
+    <span class="code-copy-icon code-copy-copy" aria-hidden="true"></span>
+    <span class="code-copy-icon code-copy-check" aria-hidden="true"></span>
+  </button>
+  <pre><code>/* original code */</code></pre>
+</div>
+```
+
+```typescript
+import { rehypeCodeCopy } from "@zlliang/rehype"
+```
+
+<Tip>
+  The inline script is only inserted once per page, even if the page contains multiple code blocks. The plugin skips insertion entirely if no code blocks are present in the document.
+</Tip>

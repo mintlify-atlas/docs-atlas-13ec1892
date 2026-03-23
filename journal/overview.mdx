@@ -1,0 +1,37 @@
+---
+title: "Overview"
+description: "What the journal CLI does and how it fits into the monorepo."
+---
+
+# Journal CLI
+
+`@zlliang/journal` is a private, workspace-internal CLI for managing content across the `tech` and `days` websites. It handles the full lifecycle of a piece of content: creating timestamped notes, scaffolding post drafts, and publishing those drafts when they're ready.
+
+## What it does
+
+The two content sites (`tech` and `days`) share the same directory structure under `content/`. The `journal` CLI understands this structure and automates the file creation and placement that would otherwise require manual work:
+
+- **Create notes** — scaffold a new timestamped note file under `content/notes/YYYY/MM/DD/` with the correct frontmatter and note type.
+- **Draft posts** — scaffold a new post draft under `content/posts/drafts/` marked as a draft in frontmatter.
+- **Publish drafts** — move a draft to `content/posts/YYYY/MM/DD/`, strip the draft flag, set the publish date, and create the associated note linking back to the post.
+
+## Context resolution
+
+The CLI auto-detects which site it's operating on. When you run `journal`, it walks up the directory tree from your current working directory, looking for a directory that contains both `content/notes` and `content/posts`. The first matching directory becomes the site root. This means you can run the command from anywhere inside a site's directory tree without passing any flags.
+
+If no matching directory is found, the CLI exits with an error asking you to run from within a site that has the expected structure.
+
+## Commands
+
+<CardGroup cols={2}>
+  <Card title="new" icon="file-plus" href="/journal/commands/new">
+    Create a new note or post draft with auto-generated frontmatter and a slug derived from the title.
+  </Card>
+  <Card title="ship" icon="rocket" href="/journal/commands/ship">
+    Publish a post draft: move it to the dated posts directory, stamp the publish date, and create the linked note.
+  </Card>
+</CardGroup>
+
+## Technical notes
+
+The CLI is powered by [CAC](https://github.com/cacjs/cac) (Command and Argument Conventions), a lightweight Node.js CLI framework. The entry point at `bin/journal.js` uses [tsx](https://tsx.is/) to run the TypeScript source directly without a separate compilation step.

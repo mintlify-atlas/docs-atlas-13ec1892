@@ -1,0 +1,57 @@
+---
+title: "Introduction"
+description: "Zilong Liang's personal website monorepo — three Astro sites, a custom CLI, and shared packages."
+---
+
+# Zilong Liang
+
+This repository contains the source code for [Zilong Liang](https://zlliang.me)'s personal websites. Zilong is a frontend developer at [Booking.com](https://booking.com), previously at Tencent and ByteDance, with a Master's degree in Mathematics from Fudan University.
+
+The monorepo hosts three distinct websites, a custom content management CLI, and shared packages that keep everything consistent.
+
+## What's in this repo
+
+<CardGroup cols={2}>
+  <Card title="www" icon="house" href="/websites/www">
+    Personal landing page at [zlliang.me](https://zlliang.me) — bilingual (English and Chinese).
+  </Card>
+  <Card title="tech" icon="code" href="/websites/tech">
+    Technical blog at [tech.zlliang.me](https://tech.zlliang.me) — notes and posts on programming in English.
+  </Card>
+  <Card title="days" icon="sun" href="/websites/days">
+    Daily journal at [days.zlliang.me](https://days.zlliang.me) — life reflections in Chinese.
+  </Card>
+  <Card title="journal CLI" icon="terminal" href="/journal/overview">
+    A custom CLI for creating notes, drafting posts, and publishing them across the two content sites.
+  </Card>
+</CardGroup>
+
+## Technology stack
+
+All websites are built with [Astro](https://astro.build/) and deployed on [Vercel](https://vercel.com/). The repository is a [pnpm](https://pnpm.io/) workspace monorepo.
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Astro 6 |
+| Styling | Tailwind CSS 4 |
+| Language | TypeScript 5 |
+| Package manager | pnpm |
+| Deployment | Vercel |
+| CLI framework | CAC |
+
+## Explore the docs
+
+<CardGroup cols={2}>
+  <Card title="Project structure" icon="folder-tree" href="/project-structure">
+    Understand the monorepo layout and how packages relate.
+  </Card>
+  <Card title="Journal CLI" icon="terminal" href="/journal/overview">
+    Learn how to create notes and publish posts using the `journal` command.
+  </Card>
+  <Card title="Shared theme package" icon="paintbrush" href="/packages/theme">
+    Explore the shared Astro components and styles used across websites.
+  </Card>
+  <Card title="Websites overview" icon="globe" href="/websites/www">
+    Deep-dive into each of the three websites.
+  </Card>
+</CardGroup>

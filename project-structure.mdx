@@ -1,0 +1,133 @@
+---
+title: "Project structure"
+description: "A guide to the monorepo layout, shared packages, and root-level scripts."
+---
+
+The `zlliang/zlliang` repository is a pnpm monorepo that contains three personal websites and the shared packages they depend on.
+
+## Directory tree
+
+```text
+zlliang/
+├── package.json            # Root scripts and workspace devDependencies
+├── pnpm-workspace.yaml     # Declares workspace globs
+├── pnpm-lock.yaml
+├── websites/
+│   ├── www/                # @zlliang/www  — landing page (zlliang.me)
+│   ├── tech/               # @zlliang/tech — tech notes (tech.zlliang.me)
+│   └── days/               # @zlliang/days — daily journal (days.zlliang.me)
+└── packages/
+    ├── journal/            # @zlliang/journal — CLI for note/post workflow
+    ├── rehype/             # @zlliang/rehype  — shared rehype plugins
+    └── theme/              # @zlliang/theme   — shared styles and Astro components
+```
+
+## Workspaces
+
+`pnpm-workspace.yaml` registers two glob patterns as workspace packages:
+
+```yaml
+packages:
+  - packages/*
+  - websites/*
+```
+
+This means every directory under `packages/` and `websites/` is a workspace package. pnpm links them together at install time, so any package can reference another with `"workspace:*"` in its `package.json` dependencies — no publishing or symlink juggling required.
+
+For example, every website declares:
+
+```json
+"@zlliang/theme": "workspace:*"
+```
+
+and pnpm resolves that directly to `packages/theme/`.
+
+## Websites
+
+<CardGroup cols={3}>
+  <Card title="www" icon="house">
+    **`@zlliang/www`** — Bilingual landing page at [zlliang.me](https://zlliang.me). Built with Astro. Uses `@zlliang/theme` and `@zlliang/rehype`. Dev server runs on port 3001.
+  </Card>
+  <Card title="tech" icon="code">
+    **`@zlliang/tech`** — English site for technical notes and posts at [tech.zlliang.me](https://tech.zlliang.me). Includes full-text search via MiniSearch. Dev server runs on port 3002.
+  </Card>
+  <Card title="days" icon="notebook-pen">
+    **`@zlliang/days`** — Chinese site for daily-life notes and posts at [days.zlliang.me](https://days.zlliang.me). Shares the same note/post content model as `tech`. Dev server runs on port 3003.
+  </Card>
+</CardGroup>
+
+All three sites are built with [Astro](https://astro.build/) and deployed on [Vercel](https://vercel.com/).
+
+## Shared packages
+
+<CardGroup cols={3}>
+  <Card title="@zlliang/journal" icon="terminal">
+    A CLI tool (`journal`) for the note and post authoring workflow. Used by `tech` and `days` via their local `journal` npm script.
+  </Card>
+  <Card title="@zlliang/rehype" icon="file-code">
+    Shared rehype plugins — heading autolinks, external link handling, and custom transformations — consumed by all three websites.
+  </Card>
+  <Card title="@zlliang/theme" icon="palette">
+    Shared Tailwind CSS styles, utility helpers, and Astro layout components (`Header`, `Footer`, `PageTitle`, `Pagination`, etc.) used across all sites.
+  </Card>
+</CardGroup>
+
+## Root scripts
+
+All commands are run from the repository root.
+
+| Script | What it does |
+|---|---|
+| `pnpm dev` | Starts dev servers for all three websites in parallel |
+| `pnpm build` | Builds all three websites in sequence |
+| `pnpm dev:www` | Starts the `www` dev server only (port 3001) |
+| `pnpm build:www` | Builds `www` only |
+| `pnpm dev:tech` | Starts the `tech` dev server only (port 3002) |
+| `pnpm build:tech` | Builds `tech` only |
+| `pnpm dev:days` | Starts the `days` dev server only (port 3003) |
+| `pnpm build:days` | Builds `days` only |
+| `pnpm journal:tech` | Runs the `journal` CLI in the context of `websites/tech` |
+| `pnpm journal:days` | Runs the `journal` CLI in the context of `websites/days` |
+
+<Note>
+`pnpm dev` passes `--parallel` to pnpm so all three dev servers start simultaneously. `pnpm build` runs sequentially so build output from shared packages is available before dependents are built.
+</Note>
+
+## Local development setup
+
+<Steps>
+  <Step title="Clone the repository">
+    ```bash
+    git clone https://github.com/zlliang/zlliang.git
+    cd zlliang
+    ```
+  </Step>
+  <Step title="Install dependencies">
+    Install all workspace packages with a single command from the repo root:
+
+    ```bash
+    pnpm install
+    ```
+
+    pnpm reads `pnpm-workspace.yaml`, links every `workspace:*` dependency in place, and installs external packages.
+  </Step>
+  <Step title="Start development servers">
+    To run all three sites at once:
+
+    ```bash
+    pnpm dev
+    ```
+
+    Or start a single site:
+
+    ```bash
+    pnpm dev:www   # http://localhost:3001
+    pnpm dev:tech  # http://localhost:3002
+    pnpm dev:days  # http://localhost:3003
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+You do not need to build the shared packages separately before running a dev server. Astro resolves the TypeScript source in `packages/` directly via the `exports` field in each package's `package.json`.
+</Tip>

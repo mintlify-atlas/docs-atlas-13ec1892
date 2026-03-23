@@ -1,0 +1,144 @@
+---
+title: "Note Types"
+description: "The six note types available when creating notes with the Journal CLI."
+---
+
+Every note has a `type` frontmatter field. The value determines how the note is displayed and categorized on the site. When you run `journal new note`, the type defaults to `regular` unless you pass `--type`.
+
+```bash
+journal new note --type link "An interesting article"
+journal new note --type til "JavaScript structuredClone"
+journal new note --type quote "A great quote"
+```
+
+<Warning>
+  The `post` type is managed automatically by `journal ship`. Do not set `type: post` manually. `journal ship` creates the associated note and sets both the `type` and `post` reference fields for you.
+</Warning>
+
+## Type reference
+
+<AccordionGroup>
+  <Accordion title="regular">
+    The default type. A general-purpose note, observation, or short thought. Use this when none of the more specific types apply. Most site updates, reflections, and infrastructure notes are `regular`.
+
+    ```bash
+    journal new note "Added pinned posts support"
+    # equivalent to:
+    journal new note --type regular "Added pinned posts support"
+    ```
+
+    ```markdown
+    ---
+    no: 58
+    title: Added post series and grouped some existing posts
+    created: 2026-03-23
+    type: regular
+    ---
+
+    I just added support for **post series** on both tech and days...
+    ```
+  </Accordion>
+
+  <Accordion title="link">
+    A note about an external link or article worth saving. The body typically contains a hyperlink to the source and a short comment on why it is worth reading.
+
+    ```bash
+    journal new note --type link "Simon Willison on Technical Blogging"
+    ```
+
+    ```markdown
+    ---
+    no: 26
+    title: Simon Willison on Technical Blogging
+    created: 2026-01-19
+    type: link
+    ---
+
+    [Simon Willison on Technical Blogging](https://writethatblog.substack.com/p/simon-willison-on-technical-blogging).
+    Simon was the direct catalyst for me starting my own blog.
+    ```
+  </Accordion>
+
+  <Accordion title="collection">
+    A curated list of related links, resources, or items grouped under a single topic. Think of it as a better-organized bookmark folder — books on a subject, tools for a workflow, articles on a theme.
+
+    ```bash
+    journal new note --type collection "Essential Astro resources"
+    ```
+
+    ```markdown
+    ---
+    no: 27
+    title: Essential Astro resources
+    created: 2026-01-22
+    type: collection
+    ---
+
+    A running list of Astro documentation, blog posts, and community resources I keep coming back to.
+    ```
+  </Accordion>
+
+  <Accordion title="quote">
+    A notable quote with attribution. The body conventionally uses a Markdown blockquote followed by an attribution line.
+
+    ```bash
+    journal new note --type quote "A quote from William Zinsser"
+    ```
+
+    ```markdown
+    ---
+    no: 12
+    title: A quote from William Zinsser
+    created: 2025-12-28
+    type: quote
+    ---
+
+    > I don't know what still newer marvels will make writing twice as easy in the
+    > next 30 years. But I do know they won't make writing twice as good.
+
+    — William Zinsser, _On Writing Well_
+    ```
+  </Accordion>
+
+  <Accordion title="til">
+    "Today I Learned" — a small discovery or new piece of knowledge. Typically starts with a **TIL:** lead-in in the body. Keeps the note short and focused on a single finding.
+
+    ```bash
+    journal new note --type til "JavaScript structuredClone"
+    ```
+
+    ```markdown
+    ---
+    no: 5
+    title: You can paste URLs as Markdown formatted links in VS Code
+    created: 2025-12-22
+    type: til
+    ---
+
+    **TIL:** When editing Markdown files in VS Code, you can paste URLs as formatted
+    links via the `markdown.editor.pasteUrlAsFormattedLink.enabled` setting.
+    ```
+  </Accordion>
+
+  <Accordion title="post">
+    A system type that links a note to its associated published post. When `journal ship` publishes a draft, it automatically creates a companion note with `type: post` and sets the `post` frontmatter field to the published post's collection ID.
+
+    <Warning>
+      Do not set `type: post` manually. This type is reserved for notes created by `journal ship`.
+    </Warning>
+
+    ```markdown
+    ---
+    no: 22
+    title: Splitting My Websites and Finalizing My Writing Framework
+    created: 2026-01-13
+    post: 2026/01/13/splitting-my-websites-and-finalizing-my-writing-framework
+    type: post
+    ---
+
+    Last weekend, I reorganized my personal websites...
+    ```
+
+    The `post` field holds the Astro collection reference ID for the published post, in `YYYY/MM/DD/slug` format.
+  </Accordion>
+</AccordionGroup>

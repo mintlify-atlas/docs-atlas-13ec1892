@@ -1,0 +1,327 @@
+---
+title: "@zlliang/theme"
+description: "Shared Astro components and global styles used across all websites in the monorepo."
+---
+
+`@zlliang/theme` is a private workspace package that provides shared Astro components, a `cn` utility, and the global CSS stylesheet consumed by all three websites (`www`, `tech`, and `days`).
+
+## Installation
+
+The package is referenced as a workspace dependency in each site's `package.json`:
+
+```json
+{
+  "dependencies": {
+    "@zlliang/theme": "workspace:*"
+  }
+}
+```
+
+## Imports
+
+Each component is individually exported via the package's `exports` map, so you can import them directly:
+
+```astro
+---
+import Header from "@zlliang/theme/components/Header.astro"
+import Footer from "@zlliang/theme/components/Footer.astro"
+import Link from "@zlliang/theme/components/Link.astro"
+import PageTitle from "@zlliang/theme/components/PageTitle.astro"
+import Pagination from "@zlliang/theme/components/Pagination.astro"
+import Section from "@zlliang/theme/components/Section.astro"
+---
+```
+
+The root index (`@zlliang/theme`) exports only the `cn` utility:
+
+```typescript
+import { cn } from "@zlliang/theme"
+```
+
+The global stylesheet is imported once per site, typically in a base layout:
+
+```astro
+---
+import "@zlliang/theme/main.css"
+---
+```
+
+## Global stylesheet
+
+`main.css` sets up the full design system. It imports Tailwind CSS v4 and the Iconify plugin, then defines:
+
+- **Font stacks** — `--font-sans`, `--font-display` (Public Sans), and `--font-mono` (Roboto Mono)
+- **Site color palettes** — `www-*` (cyan), `tech-*` (blue), and `days-*` (indigo) scales that map to Tailwind's built-in color scales
+- **Prose line-height** — `--leading-prose-en` (`1.7`) and `--leading-prose-zh` (`1.8`), applied automatically based on `:lang()`
+- **Base element styles** — headings, paragraphs, links (including `.nocolor` and `.secondary` variants), lists, blockquotes, tables, code blocks, horizontal rules, and footnotes
+- **Component CSS** — `.code-copy` copy-button overlay, `.update-note` callout box, `.image-grid` two-column layout, and `span.caption` image caption
+
+## `cn` utility
+
+A class-name helper that composes `clsx` and `tailwind-merge`.
+
+```typescript
+import { cn } from "@zlliang/theme"
+
+cn("px-4 py-2", condition && "bg-blue-500", "bg-blue-600")
+// => "px-4 py-2 bg-blue-600"  (tailwind-merge deduplicates conflicting classes)
+```
+
+## Components
+
+<CardGroup cols={2}>
+  <Card title="Header" icon="layout-panel-top">
+    Site header with a logo, title, and a slot for navigation menu items.
+  </Card>
+  <Card title="Footer" icon="layout-panel-bottom">
+    Site footer with social links, a license notice, and a "built with Astro" attribution.
+  </Card>
+  <Card title="Link" icon="link">
+    A thin wrapper around `<a>` that automatically sets `target="_blank" rel="noopener"` for external URLs.
+  </Card>
+  <Card title="PageTitle" icon="heading">
+    A styled `<h1>` block with an optional subtitle slot below it.
+  </Card>
+  <Card title="Pagination" icon="chevrons-left-right">
+    Previous/next page navigation for paginated list views.
+  </Card>
+  <Card title="Section" icon="square">
+    A content section with a shaded title bar and a default content slot.
+  </Card>
+</CardGroup>
+
+---
+
+### Header
+
+Renders the top navigation bar with a logo image, a site title, and a named slot for menu links.
+
+```astro
+---
+import Header from "@zlliang/theme/components/Header.astro"
+import logo from "../assets/logo.png"
+---
+
+<Header logo={logo} title="tech.zlliang.me">
+  <nav slot="menu">
+    <a href="/notes">Notes</a>
+    <a href="/posts">Posts</a>
+  </nav>
+</Header>
+```
+
+#### Props
+
+<ParamField path="logo" type="ImageMetadata" required>
+  Astro image metadata imported from the site's assets directory. Rendered as a 24 × 24 px image.
+</ParamField>
+
+<ParamField path="title" type="string" required>
+  The site name displayed next to the logo.
+</ParamField>
+
+<ParamField path="homeHref" type="string" default="'/'">
+  The href the logo and title link to. Defaults to `"/"`.
+</ParamField>
+
+<ParamField path="logoAlt" type="string" default="'logo'">
+  Alt text for the logo image.
+</ParamField>
+
+#### Slots
+
+| Name | Description |
+|------|-------------|
+| `menu` | Content placed in the right side of the header, typically navigation links. |
+
+---
+
+### Footer
+
+Renders a minimal footer with hard-coded social links (GitHub, X, Instagram, Xiaohongshu, Bilibili), a CC BY 4.0 license notice, and a "built with Astro" line.
+
+```astro
+---
+import Footer from "@zlliang/theme/components/Footer.astro"
+---
+
+<Footer author="Zilong Liang" />
+```
+
+```astro
+---
+import Footer from "@zlliang/theme/components/Footer.astro"
+---
+
+<!-- Localized attribution for the Chinese site -->
+<Footer
+  author="梁子龙"
+  builtWithPrefix="基于"
+  builtWithSuffix="构建"
+/>
+```
+
+#### Props
+
+<ParamField path="author" type="string" required>
+  The author's display name shown next to the copyright symbol, linked to `https://zlliang.me/`.
+</ParamField>
+
+<ParamField path="builtWithPrefix" type="string" default="'Built with'">
+  Text before the Astro link in the attribution line.
+</ParamField>
+
+<ParamField path="builtWithSuffix" type="string" default="''">
+  Text after the Astro link in the attribution line. Useful for languages where the verb comes last.
+</ParamField>
+
+---
+
+### Link
+
+A drop-in replacement for `<a>` that auto-detects external URLs (those starting with `http` or `//`) and adds `target="_blank" rel="noopener"` automatically. Accepts all standard anchor attributes.
+
+```astro
+---
+import Link from "@zlliang/theme/components/Link.astro"
+---
+
+<!-- External: opens in a new tab automatically -->
+<Link href="https://astro.build">Astro</Link>
+
+<!-- Internal: behaves like a normal anchor -->
+<Link href="/notes">Notes</Link>
+
+<!-- Force internal behavior for an https:// URL -->
+<Link href="https://zlliang.me/" external={false}>Home</Link>
+```
+
+#### Props
+
+<ParamField path="external" type="boolean">
+  Override the auto-detection. When `true`, always adds `target="_blank" rel="noopener"`. When `false`, never does. Defaults to `true` if the `href` starts with `http` or `//`, otherwise `false`.
+</ParamField>
+
+<Note>
+  All other standard HTML anchor attributes (`href`, `class`, `aria-label`, etc.) are forwarded directly to the underlying `<a>` element.
+</Note>
+
+---
+
+### PageTitle
+
+Renders a large `<h1>` heading with an optional muted subtitle below it. Has no explicit props — the title is provided via the default slot.
+
+```astro
+---
+import PageTitle from "@zlliang/theme/components/PageTitle.astro"
+---
+
+<!-- Title only -->
+<PageTitle>Technical Notes</PageTitle>
+
+<!-- Title with subtitle -->
+<PageTitle>
+  Technical Notes
+  <span slot="subtitle">Observations from building things</span>
+</PageTitle>
+```
+
+#### Slots
+
+| Name | Description |
+|------|-------------|
+| *(default)* | The page title text rendered inside `<h1>`. |
+| `subtitle` | Optional secondary line rendered in muted text below the title. Only rendered when provided. |
+
+---
+
+### Pagination
+
+Renders a row of previous/next navigation controls for paginated list pages. Shows first/last jump buttons when those URLs are provided.
+
+```astro
+---
+import Pagination from "@zlliang/theme/components/Pagination.astro"
+
+// Typically sourced from Astro's paginate() helper:
+const { page } = Astro.props
+---
+
+<Pagination
+  current={page.currentPage}
+  last={page.lastPage}
+  url={page.url}
+/>
+```
+
+#### Props
+
+<ParamField path="current" type="number" required>
+  The current page number (1-indexed).
+</ParamField>
+
+<ParamField path="last" type="number" required>
+  The total number of pages.
+</ParamField>
+
+<ParamField path="url" type="object" required>
+  An object of page URLs, matching the shape returned by Astro's `paginate()` helper.
+
+  | Field | Type | Description |
+  |-------|------|-------------|
+  | `current` | `string` | URL of the current page. |
+  | `first` | `string \| undefined` | URL of the first page. Renders a ⏮ button when present. |
+  | `prev` | `string \| undefined` | URL of the previous page. Renders a ◀ button when present. |
+  | `next` | `string \| undefined` | URL of the next page. Renders a ▶ button when present. |
+  | `last` | `string \| undefined` | URL of the last page. Renders a ⏭ button when present. |
+</ParamField>
+
+<ParamField path="label" type="string" default="'Page'">
+  The word displayed in the center of the control, e.g. `"Page 2 / 5"`.
+</ParamField>
+
+---
+
+### Section
+
+A content block with a shaded title bar across the top. Used to group related content within a page.
+
+```astro
+---
+import Section from "@zlliang/theme/components/Section.astro"
+---
+
+<!-- Static string title -->
+<Section title="Recent Posts">
+  <!-- content -->
+</Section>
+
+<!-- Custom title markup via slot -->
+<Section>
+  <a href="/posts" slot="title">All Posts →</a>
+  <!-- content -->
+</Section>
+
+<!-- Additional Tailwind classes on the wrapper -->
+<Section title="Notes" class="mt-8">
+  <!-- content -->
+</Section>
+```
+
+#### Props
+
+<ParamField path="title" type="string" default="'Untitled'">
+  Text content for the section's title bar. Ignored when the `title` slot is provided.
+</ParamField>
+
+<ParamField path="class" type="string">
+  Additional CSS classes applied to the outer wrapper `<div>`. Merged with `tailwind-merge` via the `cn` utility.
+</ParamField>
+
+#### Slots
+
+| Name | Description |
+|------|-------------|
+| *(default)* | Main body content rendered below the title bar. |
+| `title` | Custom markup for the title bar. Takes precedence over the `title` prop. |

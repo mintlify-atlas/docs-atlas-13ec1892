@@ -7,11 +7,11 @@ description: "Shared rehype plugins for Markdown and MDX processing used across 
 
 ## Installation
 
-The package is referenced as a workspace dependency in each site's `package.json`:
+The package is referenced as a workspace dev dependency in each site's `package.json`:
 
 ```json
 {
-  "dependencies": {
+  "devDependencies": {
     "@zlliang/rehype": "workspace:*"
   }
 }
@@ -35,12 +35,12 @@ import { defineConfig } from "astro/config"
 export default defineConfig({
   markdown: {
     rehypePlugins: [
-      rehypeHeadingIds,
-      rehypeAutolinkHeadings,
-      rehypeExternalLinks,
-      rehypeFootnotePrefixes,
-      rehypeImageCaptions,
-      rehypeCodeCopy,
+      [rehypeHeadingIds, {}],
+      [rehypeAutolinkHeadings, { behavior: "wrap", properties: { class: "nocolor" } }],
+      [rehypeExternalLinks, { target: "_blank", rel: ["noopener"] }],
+      [rehypeFootnotePrefixes, {}],
+      [rehypeImageCaptions, {}],
+      [rehypeCodeCopy, {}],
     ],
   },
 })
@@ -97,7 +97,7 @@ import { rehypeAutolinkHeadings } from "@zlliang/rehype"
 
 ### rehypeExternalLinks
 
-Re-exported from [`rehype-external-links`](https://github.com/rehypejs/rehype-external-links). Detects links to external domains and adds `target="_blank"` and `rel="noopener noreferrer"` (or similar) attributes. Accepts the same options as the upstream package.
+Re-exported from [`rehype-external-links`](https://github.com/rehypejs/rehype-external-links). Detects links to external domains and adds configurable `target` and `rel` attributes. In this monorepo it is configured with `target: "_blank"` and `rel: ["noopener"]`. Accepts the same options as the upstream package.
 
 ```typescript
 import { rehypeExternalLinks } from "@zlliang/rehype"

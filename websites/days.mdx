@@ -82,9 +82,14 @@ content/posts/series.json
 | Route | Description |
 | ----- | ----------- |
 | `/` | Latest notes (paginated) |
-| `/notes/` | Note archive |
+| `/notes/` | Note archive with pagination |
+| `/notes/[year]/` | Notes filtered by year |
+| `/notes/types/` | Notes filtered by type |
+| `/notes/search` | Full-text note search |
+| `/notes/[...slug]` | Individual note |
 | `/posts/` | Post listing |
 | `/posts/series/` | Series listing |
+| `/posts/[...slug]` | Individual post |
 
 ## Creating content
 
@@ -92,7 +97,7 @@ Use the `journal` CLI to scaffold new notes and posts.
 
 ```bash
 # Run from the repository root
-pnpm --filter @zlliang/days journal <command>
+pnpm journal:days <command>
 
 # Or from within websites/days/
 pnpm journal <command>

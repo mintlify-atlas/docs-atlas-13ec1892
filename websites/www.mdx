@@ -18,7 +18,7 @@ The `www` website is the personal landing page at [zlliang.me](https://zlliang.m
     `3001`
   </Card>
   <Card title="Adapter" icon="cloud">
-    Vercel (SSR)
+    Vercel (hybrid)
   </Card>
 </CardGroup>
 
@@ -98,4 +98,4 @@ Fragments hold short pieces of copy (headings, labels, bio text) that differ bet
 pnpm build:www
 ```
 
-Astro outputs static assets and server functions to `websites/www/dist/`. Vercel picks this up automatically on deploy.
+Astro outputs the site to `websites/www/dist/`. Most pages are pre-rendered as static HTML; the root `/` redirect is rendered on demand (`export const prerender = false`). Vercel picks this up automatically on deploy.
